@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOC WarRoom</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .status.active {
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
+        .war-button {
+            width: 200px;
+            height: 200px;
+            margin: 40px auto;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .war-button button {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ff3b30 0%, #ff6b6b 100%);
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 40px rgba(255, 59, 48, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+        }
+        
+        .war-button button:active {
+            transform: scale(0.95);
+        }
+        
+        .war-button.active button {
+            background: linear-gradient(135deg, #34c759 0%, #30d158 100%);
+            box-shadow: 0 10px 40px rgba(52, 199, 89, 0.4);
+        }
+        
+        .incident-info {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+        
+        .incident-info.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .label {
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
+        }
+        
+        .value {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .links {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .link-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 15px;
+        }
+        
+        .link-btn:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateX(4px);
+        }
+        
+        .icon {
+            font-size: 20px;
+        }
+        
+        .timeline {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+        
+        .timeline.active {
+            display: block;
+        }
+        
+        .timeline h3 {
+            margin-bottom: 16px;
+            font-size: 18px;
+            color: #00ff88;
+        }
+        
+        .timeline-entry {
+            padding: 12px;
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid #00ff88;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .timestamp {
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+        
+        .share-link {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid #00ff88;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .share-link.active {
+            display: block;
+        }
+        
+        .share-link input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        
+        .share-link button {
+            background: #00ff88;
+            color: #1a1a2e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+        
+        .settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .settings-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: rotate(45deg);
+        }
+        
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .settings-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .settings-content {
+            background: #1a1a2e;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .settings-content h2 {
+            font-size: 24px;
+            margin-bottom: 24px;
+            color: #00ff88;
+        }
+        
+        .settings-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .settings-section:last-of-type {
+            border-bottom: none;
+        }
+        
+        .settings-section h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #fff;
+        }
+        
+        .settings-section label {
+            display: block;
+            margin: 12px 0 6px 0;
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .settings-section input[type="text"],
+        .settings-section input[type="password"],
+        .settings-section input[type="email"],
+        .settings-section select {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .settings-section input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        
+        .settings-section small {
+            display: block;
+            color: rgba(255,255,255,0.5);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .settings-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .save-btn, .cancel-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .save-btn {
+            background: #00ff88;
+            color: #1a1a2e;
+        }
+        
+        .save-btn:hover {
+            background: #00dd77;
+        }
+        
+        .cancel-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .cancel-btn:hover {
+            background: rgba(255,255,255,0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ NOC WarRoom</h1>
+            <div class="status" id="status">Ready</div>
+            <button class="settings-btn" id="settingsBtn">⚙️</button>
+        </div>
+        
+        <div class="settings-modal" id="settingsModal">
+            <div class="settings-content">
+                <h2>⚙️ Integration Settings</h2>
+                
+                <div class="settings-section">
+                    <h3>📞 Conference Bridge</h3>
+                    <select id="bridgeType" onchange="updateBridgeFields()">
+                        <option value="custom">Custom URL</option>
+                        <option value="zoom">Zoom</option>
+                        <option value="teams">Microsoft Teams</option>
+                        <option value="webex">Webex</option>
+                        <option value="meet">Google Meet</option>
+                    </select>
+                    
+                    <div id="customBridgeFields">
+                        <label>Bridge URL Template</label>
+                        <input type="text" id="bridgeUrl" placeholder="https://meet.example.com/noc-{id}">
+                        <small>Use {id} for incident ID</small>
+                    </div>
+                    
+                    <div id="zoomFields" style="display:none;">
+                        <label>Zoom API Key</label>
+                        <input type="password" id="zoomApiKey" placeholder="Your Zoom API Key">
+                        <label>Zoom API Secret</label>
+                        <input type="password" id="zoomApiSecret" placeholder="Your Zoom API Secret">
+                        <label>Host Email</label>
+                        <input type="email" id="zoomEmail" placeholder="host@company.com">
+                        <label>Backend API URL</label>
+                        <input type="text" id="zoomBackendUrl" placeholder="https://your-api.com/api/zoom/create-meeting">
+                        <small>Your server endpoint that creates Zoom meetings</small>
+                    </div>
+                    
+                    <div id="teamsFields" style="display:none;">
+                        <label>Teams Webhook URL</label>
+                        <input type="text" id="teamsWebhook" placeholder="https://outlook.office.com/webhook/...">
+                        <label>Azure Client ID</label>
+                        <input type="text" id="teamsClientId" placeholder="Azure AD App Client ID">
+                        <label>Azure Client Secret</label>
+                        <input type="password" id="teamsClientSecret" placeholder="Azure AD App Client Secret">
+                        <label>Azure Tenant ID</label>
+                        <input type="text" id="teamsTenantId" placeholder="Azure AD Tenant ID">
+                        <label>Backend API URL</label>
+                        <input type="text" id="teamsBackendUrl" placeholder="https://your-api.com/api/teams/create-channel">
+                        <small>Your server endpoint that creates Teams channels</small>
+                    </div>
+                    
+                    <div id="webexFields" style="display:none;">
+                        <label>Webex Access Token</label>
+                        <input type="password" id="webexToken" placeholder="Your Webex Bot Token">
+                        <label>Room ID (optional)</label>
+                        <input type="text" id="webexRoom" placeholder="Default Room ID">
+                        <label>Backend API URL</label>
+                        <input type="text" id="webexBackendUrl" placeholder="https://your-api.com/api/webex/create-meeting">
+                        <small>Your server endpoint that creates Webex meetings</small>
+                    </div>
+                    
+                    <div id="meetFields" style="display:none;">
+                        <label>Google Meet URL</label>
+                        <input type="text" id="meetUrl" placeholder="https://meet.google.com/xxx-xxxx-xxx">
+                    </div>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>💬 Slack Integration</h3>
+                    <label>
+                        <input type="checkbox" id="slackEnabled"> Enable Slack
+                    </label>
+                    <label>Webhook URL (for notifications)</label>
+                    <input type="text" id="slackWebhook" placeholder="https://hooks.slack.com/services/...">
+                    <small>✅ Works immediately - get from: https://api.slack.com/messaging/webhooks</small>
+                    
+                    <label>Default Channel</label>
+                    <input type="text" id="slackChannel" placeholder="#incidents or C123456">
+                    
+                    <label>Bot Token (for channel creation)</label>
+                    <input type="password" id="slackBotToken" placeholder="xoxb-...">
+                    <small>Get from: https://api.slack.com/apps (requires channels:manage scope)</small>
+                    
+                    <label>Team/Workspace ID</label>
+                    <input type="text" id="slackTeamId" placeholder="T00000000">
+                    
+                    <label>Backend API URL (for channel creation)</label>
+                    <input type="text" id="slackBackendUrl" placeholder="https://your-api.com/api/slack/create-channel">
+                    <small>Your server endpoint that creates Slack channels</small>
+                </div>
+                
+                <div class="settings-section">
+                    <h3>👥 Microsoft Teams</h3>
+                    <label>
+                        <input type="checkbox" id="teamsEnabled"> Enable Teams
+                    </label>
+                    <label>Incoming Webhook URL (for notifications)</label>
+                    <input type="text" id="teamsWebhookUrl" placeholder="https://outlook.office.com/webhook/...">
+                    <small>✅ Works immediately - get from: Teams channel → Connectors → Incoming Webhook</small>
+                    
+                    <label>Team ID</label>
+                    <input type="text" id="teamsId" placeholder="Team ID from Teams URL">
+                </div>
+                
+                <div class="settings-section">
+                    <h3>🔔 Notification Settings</h3>
+                    <label>
+                        <input type="checkbox" id="autoOpenBridge" checked> Auto-open conference bridge
+                    </label>
+                    <label>
+                        <input type="checkbox" id="autoNotifySlack"> Auto-notify Slack
+                    </label>
+                    <label>
+                        <input type="checkbox" id="autoNotifyTeams"> Auto-notify Teams
+                    </label>
+                    <label>
+                        <input type="checkbox" id="autoCreateSlackChannel"> Auto-create dedicated Slack channel
+                    </label>
+                    <label>
+                        <input type="checkbox" id="autoCreateTeamsChannel"> Auto-create dedicated Teams channel
+                    </label>
+                </div>
+                
+                <div class="settings-actions">
+                    <button onclick="saveSettings()" class="save-btn">💾 Save Settings</button>
+                    <button onclick="closeSettings()" class="cancel-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="war-button" id="warButton">
+            <button id="startBtn">Start<br>Incident</button>
+        </div>
+        
+        <div class="incident-info" id="incidentInfo">
+            <div class="info-row">
+                <span class="label">Incident ID</span>
+                <span class="value" id="incidentId">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Started</span>
+                <span class="value" id="startTime">-</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Duration</span>
+                <span class="value" id="duration">00:00:00</span>
+            </div>
+        </div>
+        
+        <div class="share-link" id="shareLink">
+            <strong>Share this link with team:</strong>
+            <input type="text" id="shareUrl" readonly>
+            <button onclick="copyLink()">Copy Link</button>
+        </div>
+        
+        <div class="links" id="links" style="display:none;">
+            <a href="#" class="link-btn" id="bridgeLink">
+                <span class="icon">📞</span>
+                <span>Join Conference Bridge</span>
+            </a>
+            <a href="#" class="link-btn" id="slackLink">
+                <span class="icon">💬</span>
+                <span>Open Slack Channel</span>
+            </a>
+            <a href="#" class="link-btn" id="teamsLink">
+                <span class="icon">👥</span>
+                <span>Open Teams Channel</span>
+            </a>
+        </div>
+        
+        <div class="timeline" id="timeline">
+            <h3>📝 Timeline</h3>
+            <div id="timelineEntries"></div>
+        </div>
+    </div>
+    
+    <script>
+        let incidentActive = false;
+        let incidentData = null;
+        let durationInterval = null;
+        // ═══════════════════════════════════════════════════════════════
+        // 🔧 DEFAULT CONFIGURATION - REPLACE WITH YOUR REAL VALUES
+        // ═══════════════════════════════════════════════════════════════
+        let settings = {
+            // Conference Bridge Settings
+            bridgeType: 'custom',  // Options: 'custom', 'zoom', 'teams', 'webex', 'meet'
+            bridgeUrl: 'https://meet.example.com/noc-{id}', // Use {id} for incident ID
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 🎥 ZOOM API SETTINGS
+            // Get credentials: https://marketplace.zoom.us/develop/create
+            // Required scopes: meeting:write
+            // ═══════════════════════════════════════════════════════════════
+            zoomApiKey: 'YOUR_ZOOM_API_KEY_HERE',              // From Zoom App Credentials
+            zoomApiSecret: 'YOUR_ZOOM_API_SECRET_HERE',        // From Zoom App Credentials
+            zoomEmail: 'host@yourcompany.com',                  // Host email for meetings
+            zoomBackendUrl: 'https://your-api.com/api/zoom/create-meeting',  // Your backend endpoint
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 📹 WEBEX API SETTINGS
+            // Get token: https://developer.webex.com/my-apps
+            // Create a bot and copy the Bot Access Token
+            // ═══════════════════════════════════════════════════════════════
+            webexToken: 'YOUR_WEBEX_BOT_TOKEN_HERE',           // Bot Access Token
+            webexRoom: 'YOUR_WEBEX_ROOM_ID_HERE',              // Optional: default room ID
+            webexBackendUrl: 'https://your-api.com/api/webex/create-meeting',  // Your backend endpoint
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 💬 SLACK API SETTINGS
+            // Webhook (WORKS NOW): https://api.slack.com/messaging/webhooks
+            // Bot Token (for channels): https://api.slack.com/apps
+            //   Required scopes: channels:manage, channels:read, chat:write
+            // ═══════════════════════════════════════════════════════════════
+            slackEnabled: true,
+            slackWebhook: 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXX',  // Incoming Webhook URL
+            slackChannel: '#incidents',                         // Default channel
+            slackBotToken: 'xoxb-YOUR-BOT-TOKEN-HERE',         // Bot User OAuth Token
+            slackTeamId: 'T00000000',                          // Your Slack Team/Workspace ID
+            slackBackendUrl: 'https://your-api.com/api/slack/create-channel',  // Your backend endpoint
+            
+            // ═══════════════════════════════════════════════════════════════
+            // 👥 MICROSOFT TEAMS API SETTINGS
+            // Webhook (WORKS NOW): Channel → Connectors → Incoming Webhook
+            // Graph API (for channels): https://portal.azure.com
+            //   Register app with permissions: Channel.Create, ChannelMessage.Send
+            // ═══════════════════════════════════════════════════════════════
+            teamsEnabled: true,
+            teamsWebhookUrl: 'https://outlook.office.com/webhook/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',  // Incoming Webhook
+            teamsId: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',  // Team ID (from Teams URL)
+            teamsClientId: 'YOUR_AZURE_CLIENT_ID_HERE',        // Azure AD App Client ID
+            teamsClientSecret: 'YOUR_AZURE_CLIENT_SECRET_HERE', // Azure AD App Client Secret
+            teamsTenantId: 'YOUR_AZURE_TENANT_ID_HERE',        // Azure AD Tenant ID
+            teamsBackendUrl: 'https://your-api.com/api/teams/create-channel',  // Your backend endpoint
+            
+            // Google Meet (just paste your permanent meeting link)
+            meetUrl: 'https://meet.google.com/xxx-xxxx-xxx',
+            
+            // Automation Settings
+            autoOpenBridge: true,      // Auto-open conference bridge in new tab
+            autoNotifySlack: true,     // Auto-send Slack notification
+            autoNotifyTeams: true,     // Auto-send Teams notification
+            autoCreateSlackChannel: false,  // Auto-create dedicated Slack channel
+            autoCreateTeamsChannel: false   // Auto-create dedicated Teams channel
+        };
+        
+        // ═══════════════════════════════════════════════════════════════
+        // 📝 SETUP INSTRUCTIONS:
+        // ═══════════════════════════════════════════════════════════════
+        // 
+        // ✅ WORKS IMMEDIATELY (no backend needed):
+        // 1. slackWebhook - Get from: https://api.slack.com/messaging/webhooks
+        // 2. teamsWebhookUrl - Get from: Teams channel → Connectors → Incoming Webhook
+        // 3. meetUrl - Any permanent Google Meet link
+        // 4. bridgeUrl - Any custom meeting URL (use {id} for incident number)
+        // 
+        // ⚠️ REQUIRES BACKEND API (see implementation below):
+        // 1. Zoom meetings - needs zoomBackendUrl endpoint
+        // 2. Webex meetings - needs webexBackendUrl endpoint
+        // 3. Slack channels - needs slackBackendUrl endpoint + slackBotToken
+        // 4. Teams channels - needs teamsBackendUrl endpoint + Azure credentials
+        //
+        // 💡 Backend endpoints can be built with:
+        //    - Node.js + Express
+        //    - Python + Flask/FastAPI
+        //    - Any serverless function (AWS Lambda, Vercel, Netlify)
+        //
+        // See functions below for exact API implementation examples
+        // ═══════════════════════════════════════════════════════════════
+        
+        // Load settings from localStorage
+        const savedSettings = localStorage.getItem('warroomSettings');
+        if (savedSettings) {
+            settings = { ...settings, ...JSON.parse(savedSettings) };
+        }
+        
+        document.getElementById('startBtn').addEventListener('click', toggleIncident);
+        document.getElementById('settingsBtn').addEventListener('click', openSettings);
+        
+        function openSettings() {
+            document.getElementById('settingsModal').classList.add('active');
+            
+            // Load current settings into form
+            document.getElementById('bridgeType').value = settings.bridgeType;
+            document.getElementById('bridgeUrl').value = settings.bridgeUrl;
+            document.getElementById('slackEnabled').checked = settings.slackEnabled;
+            document.getElementById('slackWebhook').value = settings.slackWebhook;
+            document.getElementById('slackChannel').value = settings.slackChannel;
+            document.getElementById('slackBotToken').value = settings.slackBotToken || '';
+            document.getElementById('slackTeamId').value = settings.slackTeamId || '';
+            document.getElementById('slackBackendUrl').value = settings.slackBackendUrl || '';
+            document.getElementById('teamsEnabled').checked = settings.teamsEnabled;
+            document.getElementById('teamsWebhookUrl').value = settings.teamsWebhookUrl;
+            document.getElementById('teamsId').value = settings.teamsId || '';
+            document.getElementById('teamsClientId').value = settings.teamsClientId || '';
+            document.getElementById('teamsClientSecret').value = settings.teamsClientSecret || '';
+            document.getElementById('teamsTenantId').value = settings.teamsTenantId || '';
+            document.getElementById('teamsBackendUrl').value = settings.teamsBackendUrl || '';
+            document.getElementById('autoOpenBridge').checked = settings.autoOpenBridge;
+            document.getElementById('autoNotifySlack').checked = settings.autoNotifySlack;
+            document.getElementById('autoNotifyTeams').checked = settings.autoNotifyTeams;
+            document.getElementById('autoCreateSlackChannel').checked = settings.autoCreateSlackChannel || false;
+            document.getElementById('autoCreateTeamsChannel').checked = settings.autoCreateTeamsChannel || false;
+            document.getElementById('zoomApiKey').value = settings.zoomApiKey;
+            document.getElementById('zoomApiSecret').value = settings.zoomApiSecret;
+            document.getElementById('zoomEmail').value = settings.zoomEmail;
+            document.getElementById('zoomBackendUrl').value = settings.zoomBackendUrl || '';
+            document.getElementById('webexToken').value = settings.webexToken;
+            document.getElementById('webexRoom').value = settings.webexRoom;
+            document.getElementById('webexBackendUrl').value = settings.webexBackendUrl || '';
+            document.getElementById('meetUrl').value = settings.meetUrl;
+            document.getElementById('teamsWebhook').value = settings.teamsWebhook || '';
+            
+            updateBridgeFields();
+        }
+        
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('active');
+        }
+        
+        function updateBridgeFields() {
+            const type = document.getElementById('bridgeType').value;
+            document.getElementById('customBridgeFields').style.display = type === 'custom' ? 'block' : 'none';
+            document.getElementById('zoomFields').style.display = type === 'zoom' ? 'block' : 'none';
+            document.getElementById('teamsFields').style.display = type === 'teams' ? 'block' : 'none';
+            document.getElementById('webexFields').style.display = type === 'webex' ? 'block' : 'none';
+            document.getElementById('meetFields').style.display = type === 'meet' ? 'block' : 'none';
+        }
+        
+        function saveSettings() {
+            settings = {
+                bridgeType: document.getElementById('bridgeType').value,
+                bridgeUrl: document.getElementById('bridgeUrl').value,
+                slackEnabled: document.getElementById('slackEnabled').checked,
+                slackWebhook: document.getElementById('slackWebhook').value,
+                slackChannel: document.getElementById('slackChannel').value,
+                slackBotToken: document.getElementById('slackBotToken').value,
+                slackTeamId: document.getElementById('slackTeamId').value,
+                slackBackendUrl: document.getElementById('slackBackendUrl').value,
+                teamsEnabled: document.getElementById('teamsEnabled').checked,
+                teamsWebhookUrl: document.getElementById('teamsWebhookUrl').value,
+                teamsId: document.getElementById('teamsId').value,
+                teamsClientId: document.getElementById('teamsClientId').value,
+                teamsClientSecret: document.getElementById('teamsClientSecret').value,
+                teamsTenantId: document.getElementById('teamsTenantId').value,
+                teamsBackendUrl: document.getElementById('teamsBackendUrl').value,
+                autoOpenBridge: document.getElementById('autoOpenBridge').checked,
+                autoNotifySlack: document.getElementById('autoNotifySlack').checked,
+                autoNotifyTeams: document.getElementById('autoNotifyTeams').checked,
+                autoCreateSlackChannel: document.getElementById('autoCreateSlackChannel').checked,
+                autoCreateTeamsChannel: document.getElementById('autoCreateTeamsChannel').checked,
+                zoomApiKey: document.getElementById('zoomApiKey').value,
+                zoomApiSecret: document.getElementById('zoomApiSecret').value,
+                zoomEmail: document.getElementById('zoomEmail').value,
+                zoomBackendUrl: document.getElementById('zoomBackendUrl').value,
+                webexToken: document.getElementById('webexToken').value,
+                webexRoom: document.getElementById('webexRoom').value,
+                webexBackendUrl: document.getElementById('webexBackendUrl').value,
+                meetUrl: document.getElementById('meetUrl').value,
+                teamsWebhook: document.getElementById('teamsWebhook').value
+            };
+            
+            localStorage.setItem('warroomSettings', JSON.stringify(settings));
+            closeSettings();
+            
+            alert('✅ Settings saved! Integrations will be used on next incident.');
+        }
+        
+        function toggleIncident() {
+            if (!incidentActive) {
+                startIncident();
+            } else {
+                endIncident();
+            }
+        }
+        
+        function startIncident() {
+            incidentActive = true;
+            const now = new Date();
+            const id = 'INC-' + now.getTime().toString().slice(-6);
+            
+            incidentData = {
+                id: id,
+                startTime: now,
+                timeline: []
+            };
+            
+            // Update UI
+            document.getElementById('warButton').classList.add('active');
+            document.getElementById('startBtn').textContent = 'End\nIncident';
+            document.getElementById('status').textContent = 'ACTIVE INCIDENT';
+            document.getElementById('status').classList.add('active');
+            
+            document.getElementById('incidentInfo').classList.add('active');
+            document.getElementById('links').style.display = 'grid';
+            document.getElementById('timeline').classList.add('active');
+            document.getElementById('shareLink').classList.add('active');
+            
+            document.getElementById('incidentId').textContent = id;
+            document.getElementById('startTime').textContent = now.toLocaleTimeString();
+            
+            // Generate share link
+            const shareUrl = window.location.href.split('?')[0] + '?incident=' + id;
+            document.getElementById('shareUrl').value = shareUrl;
+            
+            // Generate bridge URL based on settings
+            let bridgeUrl = '';
+            switch(settings.bridgeType) {
+                case 'custom':
+                    bridgeUrl = settings.bridgeUrl.replace('{id}', id);
+                    break;
+                case 'zoom':
+                    bridgeUrl = createZoomMeeting(id);
+                    break;
+                case 'teams':
+                    bridgeUrl = createTeamsMeeting(id);
+                    break;
+                case 'webex':
+                    bridgeUrl = createWebexMeeting(id);
+                    break;
+                case 'meet':
+                    bridgeUrl = settings.meetUrl;
+                    break;
+            }
+            
+            // Update links
+            document.getElementById('bridgeLink').href = bridgeUrl;
+            document.getElementById('slackLink').href = settings.slackChannel || '#';
+            document.getElementById('teamsLink').href = settings.teamsWebhookUrl || '#';
+            
+            // Add timeline entry
+            addTimelineEntry('Incident started');
+            
+            // Start duration counter
+            startDurationCounter();
+            
+            // Auto-open bridge if enabled
+            if (settings.autoOpenBridge && bridgeUrl) {
+                setTimeout(() => {
+                    window.open(bridgeUrl, '_blank');
+                    addTimelineEntry('Conference bridge opened');
+                }, 500);
+            }
+            
+            // Send Slack notification if enabled
+            if (settings.autoNotifySlack && settings.slackEnabled && settings.slackWebhook) {
+                sendSlackNotification(id, bridgeUrl, shareUrl);
+            }
+            
+            // Send Teams notification if enabled
+            if (settings.autoNotifyTeams && settings.teamsEnabled && settings.teamsWebhookUrl) {
+                sendTeamsNotification(id, bridgeUrl, shareUrl);
+            }
+        }
+        
+        async function createZoomMeeting(incidentId) {
+            // ═══════════════════════════════════════════════════════════════
+            // ZOOM MEETING CREATION - BACKEND INTEGRATION
+            // ═══════════════════════════════════════════════════════════════
+            
+            if (!settings.zoomBackendUrl) {
+                addTimelineEntry('⚠️ Zoom backend URL not configured');
+                return '#';
+            }
+            
+            addTimelineEntry('Creating Zoom meeting...');
+            
+            try {
+                const response = await fetch(settings.zoomBackendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        incidentId: incidentId,
+                        topic: `NOC Incident ${incidentId}`,
+                        email: settings.zoomEmail,
+                        apiKey: settings.zoomApiKey,
+                        apiSecret: settings.zoomApiSecret
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addTimelineEntry('✅ Zoom meeting created');
+                    return data.joinUrl || data.join_url;
+                } else {
+                    addTimelineEntry('⚠️ Zoom meeting creation failed: ' + response.statusText);
+                    return '#';
+                }
+            } catch (error) {
+                addTimelineEntry('⚠️ Zoom error: ' + error.message);
+                return '#';
+            }
+            
+            // ═══════════════════════════════════════════════════════════════
+            // BACKEND IMPLEMENTATION EXAMPLE (Node.js + Express):
+            // ═══════════════════════════════════════════════════════════════
+            /*
+            const express = require('express');
+            const KJUR = require('jsrsasign');
+            const axios = require('axios');
+            
+            app.post('/api/zoom/create-meeting', async (req, res) => {
+                const { incidentId, topic, email, apiKey, apiSecret } = req.body;
+                
+                // Generate JWT token
+                const payload = {
+                    iss: apiKey,
+                    exp: Date.now() + 3600000
+                };
+                const token = KJUR.jws.JWS.sign('HS256', {alg: 'HS256'}, payload, apiSecret);
+                
+                // Create meeting
+                const response = await axios.post(
+                    `https://api.zoom.us/v2/users/${email}/meetings`,
+                    {
+                        topic: topic,
+                        type: 2, // Scheduled meeting
+                        settings: {
+                            join_before_host: true,
+                            waiting_room: false
+                        }
+                    },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                
+                res.json({ joinUrl: response.data.join_url });
+            });
+            */
+            // ═══════════════════════════════════════════════════════════════
+        }
+        
+        async function createTeamsMeeting(incidentId) {
+            // ═══════════════════════════════════════════════════════════════
+            // TEAMS CHANNEL CREATION - BACKEND INTEGRATION
+            // ═══════════════════════════════════════════════════════════════
+            
+            if (!settings.teamsBackendUrl) {
+                addTimelineEntry('⚠️ Teams backend URL not configured');
+                return '#';
+            }
+            
+            addTimelineEntry('Creating Teams channel...');
+            
+            try {
+                const response = await fetch(settings.teamsBackendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        incidentId: incidentId,
+                        teamId: settings.teamsId,
+                        clientId: settings.teamsClientId,
+                        clientSecret: settings.teamsClientSecret,
+                        tenantId: settings.teamsTenantId
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addTimelineEntry('✅ Teams channel created');
+                    return data.webUrl || data.channelUrl;
+                } else {
+                    addTimelineEntry('⚠️ Teams channel creation failed: ' + response.statusText);
+                    return '#';
+                }
+            } catch (error) {
+                addTimelineEntry('⚠️ Teams error: ' + error.message);
+                return '#';
+            }
+            
+            // ═══════════════════════════════════════════════════════════════
+            // BACKEND IMPLEMENTATION EXAMPLE (Node.js + Express):
+            // ═══════════════════════════════════════════════════════════════
+            /*
+            const express = require('express');
+            const msal = require('@azure/msal-node');
+            const axios = require('axios');
+            
+            app.post('/api/teams/create-channel', async (req, res) => {
+                const { incidentId, teamId, clientId, clientSecret, tenantId } = req.body;
+                
+                // Get access token
+                const msalConfig = {
+                    auth: {
+                        clientId: clientId,
+                        authority: `https://login.microsoftonline.com/${tenantId}`,
+                        clientSecret: clientSecret
+                    }
+                };
+                const cca = new msal.ConfidentialClientApplication(msalConfig);
+                const tokenResponse = await cca.acquireTokenByClientCredential({
+                    scopes: ['https://graph.microsoft.com/.default']
+                });
+                
+                // Create channel
+                const response = await axios.post(
+                    `https://graph.microsoft.com/v1.0/teams/${teamId}/channels`,
+                    {
+                        displayName: `Incident ${incidentId}`,
+                        description: `War room for incident ${incidentId}`
+                    },
+                    { headers: { Authorization: `Bearer ${tokenResponse.accessToken}` } }
+                );
+                
+                res.json({ webUrl: response.data.webUrl });
+            });
+            */
+            // ═══════════════════════════════════════════════════════════════
+        }
+        
+        async function createWebexMeeting(incidentId) {
+            // ═══════════════════════════════════════════════════════════════
+            // WEBEX MEETING CREATION - BACKEND INTEGRATION
+            // ═══════════════════════════════════════════════════════════════
+            
+            if (!settings.webexBackendUrl) {
+                addTimelineEntry('⚠️ Webex backend URL not configured');
+                return '#';
+            }
+            
+            addTimelineEntry('Creating Webex meeting...');
+            
+            try {
+                const response = await fetch(settings.webexBackendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        incidentId: incidentId,
+                        token: settings.webexToken,
+                        roomId: settings.webexRoom
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addTimelineEntry('✅ Webex meeting created');
+                    return data.webLink || data.meetingLink;
+                } else {
+                    addTimelineEntry('⚠️ Webex meeting creation failed: ' + response.statusText);
+                    return '#';
+                }
+            } catch (error) {
+                addTimelineEntry('⚠️ Webex error: ' + error.message);
+                return '#';
+            }
+            
+            // ═══════════════════════════════════════════════════════════════
+            // BACKEND IMPLEMENTATION EXAMPLE (Node.js + Express):
+            // ═══════════════════════════════════════════════════════════════
+            /*
+            const express = require('express');
+            const axios = require('axios');
+            
+            app.post('/api/webex/create-meeting', async (req, res) => {
+                const { incidentId, token } = req.body;
+                
+                // Create meeting
+                const response = await axios.post(
+                    'https://webexapis.com/v1/meetings',
+                    {
+                        title: `NOC Incident ${incidentId}`,
+                        start: new Date().toISOString(),
+                        end: new Date(Date.now() + 3600000).toISOString()
+                    },
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                
+                res.json({ webLink: response.data.webLink });
+            });
+            */
+            // ═══════════════════════════════════════════════════════════════
+        }
+        
+        async function createSlackChannel(incidentId) {
+            // ═══════════════════════════════════════════════════════════════
+            // SLACK CHANNEL CREATION - BACKEND INTEGRATION
+            // ═══════════════════════════════════════════════════════════════
+            
+            if (!settings.slackBackendUrl) {
+                addTimelineEntry('⚠️ Slack backend URL not configured');
+                return null;
+            }
+            
+            addTimelineEntry('Creating Slack channel...');
+            
+            try {
+                const response = await fetch(settings.slackBackendUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        incidentId: incidentId,
+                        botToken: settings.slackBotToken,
+                        teamId: settings.slackTeamId
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addTimelineEntry('✅ Slack channel created: #' + data.channelName);
+                    return {
+                        channelId: data.channelId,
+                        channelUrl: `slack://channel?team=${settings.slackTeamId}&id=${data.channelId}`
+                    };
+                } else {
+                    addTimelineEntry('⚠️ Slack channel creation failed: ' + response.statusText);
+                    return null;
+                }
+            } catch (error) {
+                addTimelineEntry('⚠️ Slack error: ' + error.message);
+                return null;
+            }
+            
+            // ═══════════════════════════════════════════════════════════════
+            // BACKEND IMPLEMENTATION EXAMPLE (Node.js + Express):
+            // ═══════════════════════════════════════════════════════════════
+            /*
+            const express = require('express');
+            const { WebClient } = require('@slack/web-api');
+            
+            app.post('/api/slack/create-channel', async (req, res) => {
+                const { incidentId, botToken } = req.body;
+                const client = new WebClient(botToken);
+                
+                // Create channel
+                const channelName = `incident-${incidentId.toLowerCase()}`;
+                const result = await client.conversations.create({
+                    name: channelName,
+                    is_private: false
+                });
+                
+                // Set channel topic
+                await client.conversations.setTopic({
+                    channel: result.channel.id,
+                    topic: `War room for incident ${incidentId}`
+                });
+                
+                res.json({
+                    channelId: result.channel.id,
+                    channelName: channelName
+                });
+            });
+            */
+            // ═══════════════════════════════════════════════════════════════
+        }
+        
+        async function sendSlackNotification(incidentId, bridgeUrl, shareUrl) {
+            if (!settings.slackWebhook) return;
+            
+            const payload = {
+                text: `🚨 *INCIDENT STARTED: ${incidentId}*`,
+                blocks: [
+                    {
+                        type: "header",
+                        text: {
+                            type: "plain_text",
+                            text: `🚨 Incident ${incidentId} Started`
+                        }
+                    },
+                    {
+                        type: "section",
+                        text: {
+                            type: "mrkdwn",
+                            text: `*Time:* ${new Date().toLocaleString()}\n*Status:* Active\n\n*Quick Actions:*`
+                        }
+                    },
+                    {
+                        type: "actions",
+                        elements: [
+                            {
+                                type: "button",
+                                text: {
+                                    type: "plain_text",
+                                    text: "📞 Join Bridge"
+                                },
+                                url: bridgeUrl,
+                                style: "danger"
+                            },
+                            {
+                                type: "button",
+                                text: {
+                                    type: "plain_text",
+                                    text: "🔗 War Room"
+                                },
+                                url: shareUrl
+                            }
+                        ]
+                    }
+                ]
+            };
+            
+            try {
+                const response = await fetch(settings.slackWebhook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    addTimelineEntry('✅ Slack notification sent');
+                } else {
+                    addTimelineEntry('⚠️ Slack notification failed');
+                }
+            } catch (error) {
+                addTimelineEntry('⚠️ Slack notification error: ' + error.message);
+            }
+        }
+        
+        async function sendTeamsNotification(incidentId, bridgeUrl, shareUrl) {
+            if (!settings.teamsWebhookUrl) return;
+            
+            const payload = {
+                "@type": "MessageCard",
+                "@context": "https://schema.org/extensions",
+                "themeColor": "FF3B30",
+                "summary": `Incident ${incidentId} Started`,
+                "sections": [{
+                    "activityTitle": `🚨 Incident ${incidentId} Started`,
+                    "activitySubtitle": new Date().toLocaleString(),
+                    "facts": [
+                        { "name": "Status:", "value": "Active" },
+                        { "name": "Incident ID:", "value": incidentId }
+                    ]
+                }],
+                "potentialAction": [
+                    {
+                        "@type": "OpenUri",
+                        "name": "📞 Join Bridge",
+                        "targets": [{ "os": "default", "uri": bridgeUrl }]
+                    },
+                    {
+                        "@type": "OpenUri",
+                        "name": "🔗 War Room",
+                        "targets": [{ "os": "default", "uri": shareUrl }]
+                    }
+                ]
+            };
+            
+            try {
+                const response = await fetch(settings.teamsWebhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    addTimelineEntry('✅ Teams notification sent');
+                } else {
+                    addTimelineEntry('⚠️ Teams notification failed');
+                }
+            } catch (error) {
+                addTimelineEntry('⚠️ Teams notification error: ' + error.message);
+            }
+        }
+        
+        function endIncident() {
+            incidentActive = false;
+            
+            document.getElementById('warButton').classList.remove('active');
+            document.getElementById('startBtn').textContent = 'Start\nIncident';
+            document.getElementById('status').textContent = 'Ready';
+            document.getElementById('status').classList.remove('active');
+            
+            addTimelineEntry('Incident resolved');
+            
+            if (durationInterval) {
+                clearInterval(durationInterval);
+            }
+        }
+        
+        function startDurationCounter() {
+            durationInterval = setInterval(() => {
+                const elapsed = Date.now() - incidentData.startTime.getTime();
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                document.getElementById('duration').textContent = 
+                    `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+            }, 1000);
+        }
+        
+        function addTimelineEntry(text) {
+            const entry = document.createElement('div');
+            entry.className = 'timeline-entry';
+            
+            const timestamp = document.createElement('div');
+            timestamp.className = 'timestamp';
+            timestamp.textContent = new Date().toLocaleTimeString();
+            
+            const content = document.createElement('div');
+            content.textContent = text;
+            
+            entry.appendChild(timestamp);
+            entry.appendChild(content);
+            
+            document.getElementById('timelineEntries').insertBefore(
+                entry, 
+                document.getElementById('timelineEntries').firstChild
+            );
+            
+            incidentData.timeline.push({
+                time: new Date(),
+                text: text
+            });
+        }
+        
+        function copyLink() {
+            const input = document.getElementById('shareUrl');
+            input.select();
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            btn.textContent = 'Copied!';
+            setTimeout(() => {
+                btn.textContent = 'Copy Link';
+            }, 2000);
+        }
+        
+        function pad(num) {
+            return num.toString().padStart(2, '0');
+        }
+        
+        // Check for shared incident link
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('incident')) {
+            // Auto-join shared incident
+            setTimeout(() => {
+                alert('Joining shared incident: ' + urlParams.get('incident'));
+            }, 500);
+        }
+    </script>
+</body>
+</html>
